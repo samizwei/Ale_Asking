@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A question for you 💕</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fff0f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hearts-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .floating-heart {
+      position: absolute;
+      opacity: 0.18;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.18; }
+      90%  { opacity: 0.18; }
+      100% { transform: translateY(-10vh) rotate(20deg); opacity: 0; }
+    }
+
+    .page {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .page.active { display: flex; }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(212, 83, 126, 0.12);
+      padding: 2.5rem 3rem;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid #fdd0e0;
+    }
+
+    .big-emoji {
+      font-size: 68px;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .pulse { animation: pulse 1.4s ease-in-out infinite; }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.12); }
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .subtext {
+      font-size: 15px;
+      color: #888;
+      margin-bottom: 2rem;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      min-height: 60px;
+      align-items: center;
+    }
+
+    .btn-yes {
+      background: #D4537E;
+      color: #fff;
+      border: none;
+      padding: 13px 40px;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .btn-yes:hover { background: #b83868; transform: scale(1.04); }
+
+    .btn-no {
+      background: transparent;
+      color: #aaa;
+      border: 1px solid #ddd;
+      padding: 13px 36px;
+      border-radius: 10px;
+      font-size: 17px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .yes-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #D4537E;
+      margin-bottom: 0.75rem;
+    }
+
+    .response-text {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.7;
+    }
+
+    .confetti-piece {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      opacity: 0;
+      pointer-events: none;
+      animation: confettiFall 3s ease-in forwards;
+    }
+
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 2rem 1.5rem; }
+      h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hearts-bg" id="heartsBg"></div>
+
+  <!-- Main question page -->
+  <div class="page active" id="mainPage">
+    <div class="card">
+      <span class="big-emoji pulse">💗</span>
+      <h1>Hey, will you be my girlfriend?</h1>
+      <p class="subtext">I've been wanting to ask you this for a while...</p>
+      <div class="btn-row" id="btnRow">
+        <button class="btn-yes" onclick="showYes()">Yes! 💕</button>
+        <button class="btn-no" id="noBtn" onclick="moveNo()">No</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yes page -->
+  <div class="page" id="yesPage">
+    <div class="card">
+      <span class="big-emoji">🥰</span>
+      <p class="yes-title">Yay!! Best day ever!</p>
+      <p class="response-text">
+        You just made me the happiest person in the world.<br>
+        I promise to always make you smile. 💕
+      </p>
+    </div>
+  </div>
+
+  <!-- No page (after button runs away too many times) -->
+  <div class="page" id="noPage">
+    <div class="card">
+      <span class="big-emoji">🥺</span>
+      <h1>Wrong answer... try again?</h1>
+      <p class="subtext" style="margin-bottom: 1.5rem;">I believe in you, you can do it!</p>
+      <button class="btn-yes" onclick="goYes()">Okay fine, yes 💕</button>
+    </div>
+  </div>
+
+  <script>
+    // Floating hearts background
+    const emojis = ['💗','💕','💖','❤️','🌸','✨'];
+    const bg = document.getElementById('heartsBg');
+    for (let i = 0; i < 16; i++) {
+      const h = document.createElement('div');
+      h.className = 'floating-heart';
+      h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      h.style.fontSize = (14 + Math.random() * 20) + 'px';
+      h.style.left = Math.random() * 100 + 'vw';
+      h.style.animationDelay = Math.random() * 8 + 's';
+      h.style.animationDuration = (6 + Math.random() * 6) + 's';
+      bg.appendChild(h);
+    }
+
+    let noClicks = 0;
+    const noBtn = document.getElementById('noBtn');
+    const btnRow = document.getElementById('btnRow');
+
+    function moveNo() {
+      noClicks++;
+      if (noClicks >= 4) {
+        showPage('noPage');
+        return;
+      }
+      // Make the button run away inside the card
+      const rowRect = btnRow.getBoundingClientRect();
+      const btnW = noBtn.offsetWidth;
+      const btnH = noBtn.offsetHeight;
+      const maxX = rowRect.width - btnW;
+      const maxY = rowRect.height - btnH;
+      noBtn.style.position = 'absolute';
+      noBtn.style.left = Math.max(0, Math.random() * maxX) + 'px';
+      noBtn.style.top = '0px';
+      noBtn.style.fontSize = Math.max(12, 17 - noClicks * 2) + 'px';
+      noBtn.textContent = ['Noo...', 'Please? 🥺', 'Come on!'][noClicks - 1] || 'Come on!';
+    }
+
+    function showYes() {
+      spawnConfetti();
+      showPage('yesPage');
+    }
+
+    function goYes() {
+      spawnConfetti();
+      showPage('yesPage');
+    }
+
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function spawnConfetti() {
+      const colors = ['#D4537E','#f9a8c9','#ffcce0','#ff85a1','#ffe4f0','#fff'];
+      for (let i = 0; i < 60; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-20px';
+        c.style.animationDelay = Math.random() * 1.5 + 's';
+        c.style.animationDuration = (2 + Math.random() * 2) + 's';
+        c.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 4500);
+      }
+    }
+  </script>
+</body>
+</html>

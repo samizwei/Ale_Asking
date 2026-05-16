@@ -137,19 +137,18 @@
       line-height: 1.7;
     }
 
-    .confetti-piece {
+    .kiss-emoji {
       position: fixed;
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-      opacity: 0;
+      top: -60px;
       pointer-events: none;
-      animation: confettiFall 3s ease-in forwards;
+      animation: kissFall linear forwards;
+      z-index: 999;
     }
 
-    @keyframes confettiFall {
-      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    @keyframes kissFall {
+      0%   { transform: translateY(0) rotate(-10deg); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(10deg); opacity: 0; }
     }
 
     @media (max-width: 480px) {
@@ -236,12 +235,12 @@
     }
 
     function showYes() {
-      spawnConfetti();
+      spawnKisses();
       showPage('yesPage');
     }
 
     function goYes() {
-      spawnConfetti();
+      spawnKisses();
       showPage('yesPage');
     }
 
@@ -250,20 +249,23 @@
       document.getElementById(id).classList.add('active');
     }
 
-    function spawnConfetti() {
-      const colors = ['#D4537E','#f9a8c9','#ffcce0','#ff85a1','#ffe4f0','#fff'];
-      for (let i = 0; i < 60; i++) {
-        const c = document.createElement('div');
-        c.className = 'confetti-piece';
-        c.style.background = colors[Math.floor(Math.random() * colors.length)];
-        c.style.left = Math.random() * 100 + 'vw';
-        c.style.top = '-20px';
-        c.style.animationDelay = Math.random() * 1.5 + 's';
-        c.style.animationDuration = (2 + Math.random() * 2) + 's';
-        c.style.transform = `rotate(${Math.random() * 360}deg)`;
-        document.body.appendChild(c);
-        setTimeout(() => c.remove(), 4500);
-      }
+    function spawnKisses() {
+      const kissEmojis = ['😘','💋','😍','🥰','💏'];
+      let count = 0;
+      const total = 60;
+      const interval = setInterval(() => {
+        if (count >= total) { clearInterval(interval); return; }
+        const k = document.createElement('div');
+        k.className = 'kiss-emoji';
+        k.textContent = kissEmojis[Math.floor(Math.random() * kissEmojis.length)];
+        k.style.fontSize = (24 + Math.random() * 28) + 'px';
+        k.style.left = (Math.random() * 100) + 'vw';
+        k.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+        k.style.animationDelay = '0s';
+        document.body.appendChild(k);
+        setTimeout(() => k.remove(), 5000);
+        count++;
+      }, 80);
     }
   </script>
 </body>
